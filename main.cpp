@@ -67,7 +67,7 @@ private slots:
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playCuckoo(hour12);
              bplay=true;
-        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() == 3) {
+        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 3) {
             playCuckoo(1); // Play one cuckoo sound for the half-hour chime
             bplay=true;
         }
