@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <QCloseEvent>
 #include <QCheckBox>
+bool bplay=0;
 class CuckooClockWidget : public QWidget {
     Q_OBJECT
 
@@ -65,16 +66,24 @@ private slots:
             int hour12 = currentTime.hour() % 12;
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playCuckoo(hour12);
-        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() == 0) {
+             bplay=true;
+        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() == 3) {
             playCuckoo(1); // Play one cuckoo sound for the half-hour chime
+            bplay=true;
+        }
+       else
+        {
+            bplay=false;
         }
     }
 
     void playCuckoo(int hours) {
+        if (!bplay) {
         cuckooSound->setLoopCount(1);
         for (int i = 0; i < hours; ++i) {
             QTimer::singleShot(i * 1000, cuckooSound, &QSoundEffect::play);
           //  cuckooSound->play();
+        }
         }
     }
 
