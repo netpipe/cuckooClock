@@ -28,7 +28,7 @@ public:
         updateTime();
 
         cuckooSound = new QSoundEffect(this);
-        cuckooSound->setSource(QUrl::fromLocalFile("cukoo.wav"));
+        cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
     }
 
 private slots:
