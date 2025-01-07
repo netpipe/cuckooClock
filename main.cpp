@@ -31,9 +31,9 @@ public:
         updateTime();
 
         cuckooSound = new QSoundEffect(this);
-#ifdef __MACOS__
-        cuckooSound->setSource(QUrl::fromLocalFile("/Applications/cuckooClock/Contents/MacOS/cuckoo.wav"));
-#elseif
+#ifdef __APPLE__
+        cuckooSound->setSource(QUrl::fromLocalFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav"));
+#else
        cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
 #endif
 
@@ -55,7 +55,7 @@ protected:
 private slots:
     void updateTime() {
         QTime currentTime = QTime::currentTime();
-        clockLabel->setText(currentTime.toString("hh:mm:ss"));
+        clockLabel->setText(currentTime.toString("hh:mm:ss ap"));
 
         if (currentTime.minute() == 0 && currentTime.second() == 0) {
             playCuckoo(currentTime.hour());
@@ -81,11 +81,10 @@ private slots:
 private:
     void createTrayIcon() {
         trayIcon = new QSystemTrayIcon(this);
-#ifdef __MACOS__
-               trayIcon->setIcon(QIcon("/Applications/cuckooClock/Contents/MacOS/Icon.png"));
+#ifdef __APPLE__
+               trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon.png"));
 #else
         trayIcon->setIcon(QIcon("Icon.png"));
-
 #endif
 
         trayIcon->setToolTip("Cuckoo Clock");
