@@ -62,16 +62,19 @@ private slots:
         clockLabel->setText(currentTime.toString("hh:mm:ss ap"));
 
         if (currentTime.minute() == 0 && currentTime.second() <= 3) {
-            playCuckoo(currentTime.hour());
-        }
-        if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 2) {
-            playCuckoo(1);
+            int hour12 = currentTime.hour() % 12;
+            if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
+            playCuckoo(hour12);
+        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() == 0) {
+            playCuckoo(1); // Play one cuckoo sound for the half-hour chime
         }
     }
 
     void playCuckoo(int hours) {
+        cuckooSound->setLoopCount(1);
         for (int i = 0; i < hours; ++i) {
             QTimer::singleShot(i * 1000, cuckooSound, &QSoundEffect::play);
+          //  cuckooSound->play();
         }
     }
 
