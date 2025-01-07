@@ -5,6 +5,9 @@
 #include <QTimer>
 #include <QTime>
 #include <QSoundEffect>
+#include <QSystemTrayIcon>
+#include <QMenu>
+#include <QCloseEvent>
 
 class CuckooClockWidget : public QWidget {
     Q_OBJECT
@@ -29,6 +32,20 @@ public:
 
         cuckooSound = new QSoundEffect(this);
         cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
+
+        createTrayIcon();
+    }
+
+    ~CuckooClockWidget() {
+        delete trayIcon;
+    }
+
+protected:
+    void closeEvent(QCloseEvent *event) override {
+        if (trayIcon && trayIcon->isVisible()) {
+            this->hide();
+            event->ignore();
+        }
     }
 
 private slots:
@@ -47,9 +64,39 @@ private slots:
         }
     }
 
+    void showMainWidget() {
+        this->show();
+        this->raise();
+        this->activateWindow();
+    }
+
+    void exitApplication() {
+        QApplication::quit();
+    }
+
 private:
+    void createTrayIcon() {
+        trayIcon = new QSystemTrayIcon(this);
+        trayIcon->setIcon(QIcon("icon.png"));
+        trayIcon->setToolTip("Cuckoo Clock");
+
+        QMenu *trayMenu = new QMenu(this);
+        QAction *showAction = new QAction("Show Cuckoo Clock", this);
+        QAction *exitAction = new QAction("Exit", this);
+
+        connect(showAction, &QAction::triggered, this, &CuckooClockWidget::showMainWidget);
+        connect(exitAction, &QAction::triggered, this, &CuckooClockWidget::exitApplication);
+
+        trayMenu->addAction(showAction);
+        trayMenu->addAction(exitAction);
+
+        trayIcon->setContextMenu(trayMenu);
+        trayIcon->show();
+    }
+
     QLabel *clockLabel;
     QSoundEffect *cuckooSound;
+    QSystemTrayIcon *trayIcon;
 };
 
 int main(int argc, char *argv[]) {
