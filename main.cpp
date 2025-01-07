@@ -31,7 +31,11 @@ public:
         updateTime();
 
         cuckooSound = new QSoundEffect(this);
-        cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
+#ifdef __MACOS__
+        cuckooSound->setSource(QUrl::fromLocalFile("/Applications/cuckooClock/Contents/MacOS/cuckoo.wav"));
+#elseif
+       cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
+#endif
 
         createTrayIcon();
     }
@@ -77,7 +81,13 @@ private slots:
 private:
     void createTrayIcon() {
         trayIcon = new QSystemTrayIcon(this);
-        trayIcon->setIcon(QIcon("icon.png"));
+#ifdef __MACOS__
+               trayIcon->setIcon(QIcon("/Applications/cuckooClock/Contents/MacOS/Icon.png"));
+#else
+        trayIcon->setIcon(QIcon("Icon.png"));
+
+#endif
+
         trayIcon->setToolTip("Cuckoo Clock");
 
         QMenu *trayMenu = new QMenu(this);
