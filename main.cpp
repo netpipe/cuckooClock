@@ -57,7 +57,7 @@ private slots:
         QTime currentTime = QTime::currentTime();
         clockLabel->setText(currentTime.toString("hh:mm:ss ap"));
 
-        if (currentTime.minute() == 0 && currentTime.second() == 0) {
+        if (currentTime.minute() == 0 && currentTime.second() <= 3) {
             playCuckoo(currentTime.hour());
         }
     }
