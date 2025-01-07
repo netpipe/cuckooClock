@@ -60,6 +60,9 @@ private slots:
         if (currentTime.minute() == 0 && currentTime.second() <= 3) {
             playCuckoo(currentTime.hour());
         }
+        if (currentTime.minute() == 30 && currentTime.second() <= 3) {
+            playCuckoo(1);
+        }
     }
 
     void playCuckoo(int hours) {
