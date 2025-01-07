@@ -8,7 +8,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QCloseEvent>
-
+#include <QCheckBox>
 class CuckooClockWidget : public QWidget {
     Q_OBJECT
 
@@ -27,6 +27,10 @@ public:
         QTimer *timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &CuckooClockWidget::updateTime);
         timer->start(1000); // Update the time every second
+
+        halfHourChimeCheckBox = new QCheckBox("Enable Half-Hour Chime", this);
+        layout->addWidget(halfHourChimeCheckBox);
+        halfHourChimeCheckBox->setChecked(1);
 
         updateTime();
 
@@ -60,7 +64,7 @@ private slots:
         if (currentTime.minute() == 0 && currentTime.second() <= 3) {
             playCuckoo(currentTime.hour());
         }
-        if (currentTime.minute() == 30 && currentTime.second() <= 3) {
+        if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 2) {
             playCuckoo(1);
         }
     }
@@ -84,6 +88,7 @@ private slots:
 private:
     void createTrayIcon() {
         trayIcon = new QSystemTrayIcon(this);
+
 #ifdef __APPLE__
                trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon.png"));
 #else
@@ -109,6 +114,7 @@ private:
     QLabel *clockLabel;
     QSoundEffect *cuckooSound;
     QSystemTrayIcon *trayIcon;
+        QCheckBox *halfHourChimeCheckBox;
 };
 
 int main(int argc, char *argv[]) {
