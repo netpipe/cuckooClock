@@ -1,4 +1,4 @@
-#include <QApplication>
+﻿#include <QApplication>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -27,7 +27,7 @@ public:
 
         QTimer *timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &CuckooClockWidget::updateTime);
-        timer->start(1000); // Update the time every second
+        timer->start(500); // Update the time every second
 
         halfHourChimeCheckBox = new QCheckBox("Enable Half-Hour Chime", this);
         layout->addWidget(halfHourChimeCheckBox);
@@ -67,24 +67,33 @@ private slots:
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playCuckoo(hour12);
              bplay=true;
-        } else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 3) {
+        }else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 3) {
             playCuckoo(1); // Play one cuckoo sound for the half-hour chime
             bplay=true;
-        }
-       else
+        }       else
         {
             bplay=false;
         }
+
+        if ( currentTime.minute() == 55 && currentTime.second() <= 3) {
+           trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+        }
+        if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 25 && currentTime.second() <= 3) {
+            trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+         }
+
     }
 
     void playCuckoo(int hours) {
         if (!bplay) {
         cuckooSound->setLoopCount(1);
+        trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon3.png"));
         for (int i = 0; i < hours; ++i) {
             QTimer::singleShot(i * 1000, cuckooSound, &QSoundEffect::play);
           //  cuckooSound->play();
         }
         }
+        trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon.png"));
     }
 
     void showMainWidget() {
