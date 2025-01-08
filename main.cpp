@@ -41,7 +41,7 @@ public:
 #else
        cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
 #endif
-
+cuckooSound->setVolume(100);
         createTrayIcon();
     }
 
@@ -62,12 +62,12 @@ private slots:
         QTime currentTime = QTime::currentTime();
         clockLabel->setText(currentTime.toString("hh:mm:ss ap"));
 
-        if (currentTime.minute() == 0 && currentTime.second() <= 5) {
+        if (currentTime.minute() == 0 && currentTime.second() <= 10) {
             int hour12 = currentTime.hour() % 12;
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playCuckoo(hour12);
              bplay=true;
-        }else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 5) {
+        }else if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 10) {
             playCuckoo(1); // Play one cuckoo sound for the half-hour chime
             bplay=true;
         }       else
