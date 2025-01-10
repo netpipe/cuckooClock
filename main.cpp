@@ -9,6 +9,10 @@
 #include <QMenu>
 #include <QCloseEvent>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QTextStream>
+#include <QFileDialog>
+
 bool bplay=0;
 class CuckooClockWidget : public QWidget {
     Q_OBJECT
@@ -29,6 +33,10 @@ public:
         connect(timer, &QTimer::timeout, this, &CuckooClockWidget::updateTime);
         timer->start(500); // Update the time every second
 
+        QPushButton *selectSoundButton = new QPushButton("Select Cuckoo Sound", this);
+        layout->addWidget(selectSoundButton);
+        connect(selectSoundButton, &QPushButton::clicked, this, &CuckooClockWidget::selectSound);
+
         halfHourChimeCheckBox = new QCheckBox("Enable Half-Hour Chime", this);
         layout->addWidget(halfHourChimeCheckBox);
         halfHourChimeCheckBox->setChecked(1);
@@ -36,12 +44,15 @@ public:
         updateTime();
 
         cuckooSound = new QSoundEffect(this);
-#ifdef __APPLE__
+        #ifdef __APPLE__
         cuckooSound->setSource(QUrl::fromLocalFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav"));
-#else
+        #else
        cuckooSound->setSource(QUrl::fromLocalFile("cuckoo.wav"));
-#endif
-cuckooSound->setVolume(100);
+        #endif
+
+       loadSound(); // Load the saved sound file path on startup
+
+        cuckooSound->setVolume(100);
         createTrayIcon();
     }
 
@@ -76,24 +87,84 @@ private slots:
         }
 
         if ( currentTime.minute() == 55 && currentTime.second() <= 5) {
-           trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+        #ifdef __APPLE__
+            trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+        #else
+           trayIcon->setIcon(QIcon("Icon2.png"));
+        #endif
         }
         if (halfHourChimeCheckBox->isChecked() && currentTime.minute() == 25 && currentTime.second() <= 5) {
-            trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+        #ifdef __APPLE__
+             trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon2.png"));
+        #else
+            trayIcon->setIcon(QIcon("Icon2.png"));
+        #endif
          }
 
+    }
+
+    void selectSound() {
+        #ifdef __APPLE__
+        QString soundFilePath = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/clock.app/Contents/MacOS/", "Sound Files (*.wav)");
+        #else
+         QString soundFilePath = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
+        #endif
+        if (!soundFilePath.isEmpty()) {
+            cuckooSound->setSource(QUrl::fromLocalFile(soundFilePath));
+            saveSound(soundFilePath);
+        }
+    }
+
+    void saveSound(const QString &filePath) {
+        #ifdef __APPLE__
+        QFile file("/Applications/clock.app/Contents/MacOS/cuckoo_sound.txt");
+        #else
+        QFile file("cuckoo_sound.txt");
+        #endif
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+            out << filePath;
+            file.close();
+        }
+    }
+
+    void loadSound() {
+        #ifdef __APPLE__
+        QFile file("/Applications/clock.app/Contents/MacOS/cuckoo_sound.txt");
+        #else
+        QFile file("cuckoo_sound.txt");
+        #endif
+
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            QString filePath = in.readLine();
+            file.close();
+            if (!filePath.isEmpty() && QFile::exists(filePath)) {
+                cuckooSound->setSource(QUrl::fromLocalFile(filePath));
+            }
+        }
     }
 
     void playCuckoo(int hours) {
         if (!bplay) {
         cuckooSound->setLoopCount(1);
+        #ifdef __APPLE__
         trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon3.png"));
+         #else
+        trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon3.png"));
+        #endif
+
         for (int i = 0; i < hours; ++i) {
             QTimer::singleShot(i * 1000, cuckooSound, &QSoundEffect::play);
           //  cuckooSound->play();
         }
         }
+        #ifdef __APPLE__
         trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/Icon.png"));
+        #else
+        trayIcon->setIcon(QIcon("Icon.png"));
+        #endif
+
     }
 
     void showMainWidget() {
@@ -137,6 +208,9 @@ private:
     QSystemTrayIcon *trayIcon;
         QCheckBox *halfHourChimeCheckBox;
 };
+
+
+
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
