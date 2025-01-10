@@ -61,10 +61,10 @@ public:
        layout->addWidget(volumeSlider);
        connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClockWidget::setVolume);
 
+        cuckooSound->setVolume(100);
+
        loadVolume(volumeSlider); // Load saved volume on startup
 
-
-        cuckooSound->setVolume(100);
         createTrayIcon();
     }
 
@@ -205,7 +205,7 @@ private slots:
         #endif
 
         for (int i = 0; i < hours; ++i) {
-            QTimer::singleShot(i * 1000, cuckooSound, &QSoundEffect::play);
+            QTimer::singleShot(i * 1500, cuckooSound, &QSoundEffect::play);
           //  cuckooSound->play();
         }
         }
