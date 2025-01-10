@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QSlider>
 
 bool bplay=0;
 class CuckooClockWidget : public QWidget {
@@ -32,6 +33,13 @@ public:
         QTimer *timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &CuckooClockWidget::updateTime);
         timer->start(500); // Update the time every second
+
+        QSlider *volumeSlider = new QSlider(Qt::Horizontal, this);
+        volumeSlider->setRange(0, 100);
+        layout->addWidget(volumeSlider);
+        connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClockWidget::setVolume);
+
+      //  loadVolume(volumeSlider); // Load saved volume on startup
 
         QPushButton *selectSoundButton = new QPushButton("Select Cuckoo Sound", this);
         layout->addWidget(selectSoundButton);
@@ -105,7 +113,7 @@ private slots:
 
     void selectSound() {
         #ifdef __APPLE__
-        QString soundFilePath = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/clock.app/Contents/MacOS/", "Sound Files (*.wav)");
+        QString soundFilePath = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/cuckooClock.app/Contents/MacOS/", "Sound Files (*.wav)");
         #else
          QString soundFilePath = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
         #endif
@@ -117,7 +125,7 @@ private slots:
 
     void saveSound(const QString &filePath) {
         #ifdef __APPLE__
-        QFile file("/Applications/clock.app/Contents/MacOS/cuckoo_sound.txt");
+        QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_sound.txt");
         #else
         QFile file("cuckoo_sound.txt");
         #endif
@@ -130,7 +138,7 @@ private slots:
 
     void loadSound() {
         #ifdef __APPLE__
-        QFile file("/Applications/clock.app/Contents/MacOS/cuckoo_sound.txt");
+        QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_sound.txt");
         #else
         QFile file("cuckoo_sound.txt");
         #endif
@@ -142,6 +150,44 @@ private slots:
             if (!filePath.isEmpty() && QFile::exists(filePath)) {
                 cuckooSound->setSource(QUrl::fromLocalFile(filePath));
             }
+        }
+    }
+
+    void setVolume(int value) {
+        float volume = value / 100.0f; // Convert to 0.0 - 1.0 range
+        cuckooSound->setVolume(volume);
+        saveVolume(value);
+    }
+
+    void saveVolume(int value) {
+                #ifdef __APPLE__
+        QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_volume.txt");
+        #else
+              QFile file("cuckoo_volume.txt");
+        #endif
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+            out << value;
+            file.close();
+        }
+    }
+
+    void loadVolume(QSlider *slider) {
+        #ifdef __APPLE__
+        QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_volume.txt");
+        #else
+        QFile file("cuckoo_volume.txt");
+        #endif
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            int value;
+            in >> value;
+            file.close();
+            slider->setValue(value);
+            setVolume(value);
+        } else {
+            slider->setValue(50); // Default volume
+            setVolume(50);
         }
     }
 
