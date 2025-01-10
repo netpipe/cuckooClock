@@ -34,12 +34,7 @@ public:
         connect(timer, &QTimer::timeout, this, &CuckooClockWidget::updateTime);
         timer->start(500); // Update the time every second
 
-        QSlider *volumeSlider = new QSlider(Qt::Horizontal, this);
-        volumeSlider->setRange(0, 100);
-        layout->addWidget(volumeSlider);
-        connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClockWidget::setVolume);
 
-      //  loadVolume(volumeSlider); // Load saved volume on startup
 
         QPushButton *selectSoundButton = new QPushButton("Select Cuckoo Sound", this);
         layout->addWidget(selectSoundButton);
@@ -59,6 +54,15 @@ public:
         #endif
 
        loadSound(); // Load the saved sound file path on startup
+
+
+       QSlider *volumeSlider = new QSlider(Qt::Horizontal, this);
+       volumeSlider->setRange(0, 100);
+       layout->addWidget(volumeSlider);
+       connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClockWidget::setVolume);
+
+       loadVolume(volumeSlider); // Load saved volume on startup
+
 
         cuckooSound->setVolume(100);
         createTrayIcon();
@@ -160,10 +164,10 @@ private slots:
     }
 
     void saveVolume(int value) {
-                #ifdef __APPLE__
-        QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_volume.txt");
+        #ifdef __APPLE__
+            QFile file("/Applications/cuckooClock.app/Contents/MacOS/cuckoo_volume.txt");
         #else
-              QFile file("cuckoo_volume.txt");
+             QFile file("cuckoo_volume.txt");
         #endif
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
