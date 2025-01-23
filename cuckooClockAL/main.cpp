@@ -96,13 +96,17 @@ private:
         loadSettings();
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
-playSound(1);
+//playSound(1);
         //playSound(4);
     }
 
     void setupTrayIcon() {
         trayIcon = new QSystemTrayIcon(this);
+#ifdef __APPLE__
+        trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/icon.png"));
+#else
         trayIcon->setIcon(QIcon("icon.png"));
+#endif
         trayMenu = new QMenu(this);
 
         auto *quitAction = new QAction("Quit", this);
@@ -126,7 +130,11 @@ playSound(1);
         soundFile = settings->value("soundFile", "").toString();
         halfHourChime->setChecked(settings->value("halfHourChime", false).toBool());
        // if (soundFile.isEmpty()){
+#ifndef __APPLE__
             loadWavFile("cuckoo.wav",buffer);
+#else
+         loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav",buffer);
+#endif
       //      return;
        // }    else {
         loadWavFile(soundFile.toStdString().c_str(),buffer);
