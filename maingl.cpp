@@ -4,10 +4,9 @@
 #include <QCheckBox>
 #include <QTimer>
 #include <QTime>
-#include <QPainter>
-#include <QWidget>
+#include <QtMath>
 
-class ClockWidget : public QOpenGLWidget {
+class ClockWidget : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
 
 public:
@@ -23,76 +22,107 @@ public:
     }
 
 protected:
-    void paintEvent(QPaintEvent *event) override {
-        Q_UNUSED(event);
+    void initializeGL() override {
+        initializeOpenGLFunctions();
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
 
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
+    void resizeGL(int w, int h) override {
+        glViewport(0, 0, w, h);
+    }
 
-        int side = qMin(width(), height());
-        painter.translate(width() / 2, height() / 2);
-        painter.scale(side / 200.0, side / 200.0);
+    void paintGL() override {
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        drawClockFace(painter);
-        drawClockHands(painter);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        drawClockFace();
+        drawClockHands();
     }
 
 private:
     QTimer *timer;
     bool is24HourMode;
 
-    void drawClockFace(QPainter &painter) {
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(Qt::white);
-        painter.drawEllipse(-100, -100, 200, 200);
+    void drawClockFace() {
+        glColor3f(0.0f, 0.0f, 0.0f);
 
-        painter.setPen(Qt::black);
+        // Draw hour markers
         for (int i = 0; i < 60; ++i) {
+            glPushMatrix();
+            glRotatef(i * 6.0f, 0.0f, 0.0f, 1.0f);
+
             if (i % 5 == 0) {
-                painter.drawLine(0, -88, 0, -100);
+                glBegin(GL_LINES);
+                glVertex2f(0.0f, 0.9f);
+                glVertex2f(0.0f, 0.8f);
+                glEnd();
             } else {
-                painter.drawLine(0, -92, 0, -100);
+                glBegin(GL_LINES);
+                glVertex2f(0.0f, 0.9f);
+                glVertex2f(0.0f, 0.85f);
+                glEnd();
             }
-            painter.rotate(6.0);
+
+            glPopMatrix();
         }
 
-        painter.setFont(QFont("Arial", 8));
+        // Draw numbers
         for (int i = 1; i <= (is24HourMode ? 24 : 12); ++i) {
-            int angle = 360 / (is24HourMode ? 24 : 12) * i;
-            double x = 85 * qCos(qDegreesToRadians(angle - 90.0));
-            double y = 85 * qSin(qDegreesToRadians(angle - 90.0));
-            painter.drawText(QRectF(x - 10, y - 10, 20, 20), Qt::AlignCenter, QString::number(i));
+            float angle = qDegreesToRadians(360.0f / (is24HourMode ? 24.0f : 12.0f) * i - 90.0f);
+            float x = 0.75f * qCos(angle);
+            float y = 0.75f * qSin(angle);
+            renderText(x, y, 0.0, QString::number(i));
         }
     }
 
-    void drawClockHands(QPainter &painter) {
+    void drawClockHands() {
         QTime time = QTime::currentTime();
 
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(Qt::black);
-
         // Hour hand
-        painter.save();
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glPushMatrix();
         int hours = time.hour();
         if (!is24HourMode) {
             hours = hours % 12;
         }
-        painter.rotate(30.0 * ((hours % (is24HourMode ? 24 : 12)) + time.minute() / 60.0));
-        painter.drawConvexPolygon(QPolygon({QPoint(-5, 0), QPoint(5, 0), QPoint(0, -50)}));
-        painter.restore();
+        glRotatef(30.0f * (hours % (is24HourMode ? 24 : 12)) + time.minute() / 2.0f, 0.0f, 0.0f, 1.0f);
+        glBegin(GL_QUADS);
+        glVertex2f(-0.02f, 0.0f);
+        glVertex2f(0.02f, 0.0f);
+        glVertex2f(0.01f, 0.5f);
+        glVertex2f(-0.01f, 0.5f);
+        glEnd();
+        glPopMatrix();
 
         // Minute hand
-        painter.save();
-        painter.rotate(6.0 * (time.minute() + time.second() / 60.0));
-        painter.drawConvexPolygon(QPolygon({QPoint(-3, 0), QPoint(3, 0), QPoint(0, -70)}));
-        painter.restore();
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glPushMatrix();
+        glRotatef(6.0f * time.minute() + time.second() / 10.0f, 0.0f, 0.0f, 1.0f);
+        glBegin(GL_QUADS);
+        glVertex2f(-0.015f, 0.0f);
+        glVertex2f(0.015f, 0.0f);
+        glVertex2f(0.01f, 0.7f);
+        glVertex2f(-0.01f, 0.7f);
+        glEnd();
+        glPopMatrix();
 
         // Second hand
-        painter.setBrush(Qt::red);
-        painter.save();
-        painter.rotate(6.0 * time.second());
-        painter.drawConvexPolygon(QPolygon({QPoint(-2, 0), QPoint(2, 0), QPoint(0, -90)}));
-        painter.restore();
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glPushMatrix();
+        glRotatef(6.0f * time.second(), 0.0f, 0.0f, 1.0f);
+        glBegin(GL_QUADS);
+        glVertex2f(-0.01f, 0.0f);
+        glVertex2f(0.01f, 0.0f);
+        glVertex2f(0.005f, 0.8f);
+        glVertex2f(-0.005f, 0.8f);
+        glEnd();
+        glPopMatrix();
     }
 };
 

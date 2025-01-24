@@ -177,12 +177,12 @@ private:
     QString grandsoundFile;
     QTimer *clockTimer;
     QSettings *settings;
-        QLabel *clockLabel;
-QSlider *volumeSlider;
-QCheckBox *grandclock;
-QCheckBox *halfsound;
-QPushButton *loadGrandSoundButton;
-ClockWidget *clockWidget;
+    QLabel *clockLabel;
+    QSlider *volumeSlider;
+    QCheckBox *grandclock;
+    QCheckBox *halfsound;
+    QPushButton *loadGrandSoundButton;
+    ClockWidget *clockWidget;
 
     void setupUI() {
         auto *centralWidget = new QWidget(this);
