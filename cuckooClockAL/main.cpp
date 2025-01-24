@@ -190,7 +190,7 @@ if (grandclock->isChecked()){loaded=1;}
     }
 
     void playSound(int hour) {
-        if (!bplay){
+        if (bplay){
     //    if (filePath.isEmpty()) {
      //       statusLabel->setText("Status: No sound file loaded");
     //        return;
@@ -308,12 +308,12 @@ if (grandclock->isChecked()){loaded=1;}
             int hour12 = currentTime.hour() % 12;
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playSound(hour12);
-            bplay=true;
+            bplay=false;
         }else if (halfHourChime->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 10) {
             playSound(1); // Play one cuckoo sound for the half-hour chime
-            bplay=true;
-        }else{
             bplay=false;
+        }else{
+            bplay=true;
         }
 
 
