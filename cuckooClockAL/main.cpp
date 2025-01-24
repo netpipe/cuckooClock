@@ -359,7 +359,7 @@ private:
         layout->addWidget(clockLabel);
 
         volumeSlider = new QSlider(Qt::Horizontal, this);
-        volumeSlider->setRange(0, 100);
+        volumeSlider->setRange(0, 200);
         volumeSlider->setValue(100);
         layout->addWidget(volumeSlider);
         connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClock::setVolume);
@@ -380,7 +380,7 @@ private:
         loadSettings();
 
         bplay=1;
-        //playSound(1);
+        playSound(1);
 
         if (grandclock->isChecked()){loaded=1;}
      //    volumeSlider->setValue(100);
@@ -614,7 +614,7 @@ private:
         //ALuint buffer;
         alGenBuffers(1, &buffer);
         if ((volume / 100) > 1.0f) {
-        //    amplifyAudioData(data, header.bitsPerSample, (volume / 100));
+            amplifyAudioData(data, header.bitsPerSample, (volume / 100));
         }
         alBufferData(buffer, format, data.data(), header.dataSize, header.sampleRate);
 
