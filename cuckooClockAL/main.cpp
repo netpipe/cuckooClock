@@ -76,6 +76,7 @@ private:
         QLabel *clockLabel;
 QSlider *volumeSlider;
 QCheckBox *grandclock;
+QCheckBox *halfsound;
 QPushButton *loadGrandSoundButton;
 
     void setupUI() {
@@ -90,6 +91,8 @@ QPushButton *loadGrandSoundButton;
 
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
         grandclock = new QCheckBox("Enable grandclock", this);
+        halfsound = new QCheckBox("Enable grand halfhour chime", this);
+        halfsound->setChecked(1);
         grandclock->setChecked(1);
         halfHourChime->setChecked(1);
 
@@ -110,6 +113,7 @@ QPushButton *loadGrandSoundButton;
         layout->addWidget(loadGrandSoundButton);
         layout->addWidget(halfHourChime);
         layout->addWidget(grandclock);
+         layout->addWidget(halfsound);
         layout->addWidget(statusLabel);
 
         setCentralWidget(centralWidget);
@@ -170,6 +174,7 @@ if (grandclock->isChecked()){loaded=1;}
         soundFile = settings->value("soundFile", "").toString();
         grandsoundFile = settings->value("grandsoundFile", "").toString();
         halfHourChime->setChecked(settings->value("halfHourChime", false).toBool());
+        halfsound->setChecked(settings->value("halfsound", false).toBool());
         grandclock->setChecked(settings->value("grandclock", false).toBool());
         volume = settings->value("volume", "").toFloat();
         //qDebug() << "test3" << volume;
@@ -203,6 +208,7 @@ if (grandclock->isChecked()){loaded=1;}
         settings->setValue("soundFile", soundFile);
         settings->setValue("grandsoundFile", grandsoundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
+        settings->setValue("halfsound", halfsound->isChecked());
         settings->setValue("grandclock", grandclock->isChecked());
        //  qDebug() <<  "test" << volume;
         settings->setValue("volume", volume);
@@ -261,7 +267,24 @@ loadWavFile("grandfclock.wav",buffer2);
         }
 
         for (int i = 0; i < hour; ++i) {
-            alSourcePlay(source);
+            if (halfsound->isChecked()){
+        #ifndef __APPLE__
+        loadWavFile("grandfclock.wav",buffer2);
+        #else
+                   if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
+                        loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+                   }
+        #endif
+
+        alGenSources(1, &source2);
+        alSourcei(source2, AL_BUFFER, buffer2);
+
+        alSourcef(source2, AL_GAIN, value);
+
+            alSourcePlay(source2);
+            }else
+               {  alSourcePlay(source);
+            }
 
             // Wait for the sound to finish playing
             ALint state;
