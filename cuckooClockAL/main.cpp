@@ -28,6 +28,7 @@
         ALuint buffer;
         float volume;
 bool loaded=0;
+bool bplay=0;
         struct WAVHeader {
             char riff[4];
             uint32_t chunkSize;
@@ -170,7 +171,7 @@ if (grandclock->isChecked()){loaded=1;}
             loadWavFile(soundFile.toStdString().c_str(),buffer);
         }
 #else
-         if (!loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav",buffer)) {
+         if (!loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock-chime.wav",buffer)) {
              loadWavFile(soundFile.toStdString().c_str(),buffer);
          }
 #endif
@@ -182,13 +183,14 @@ if (grandclock->isChecked()){loaded=1;}
         settings->setValue("soundFile", soundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
         settings->setValue("grandclock", grandclock->isChecked());
-         qDebug() <<  "test" << volume;
+       //  qDebug() <<  "test" << volume;
         settings->setValue("volume", volume);
-        qDebug() << settings->value("volume", "").toFloat();
+       // qDebug() << settings->value("volume", "").toFloat();
 
     }
 
     void playSound(int hour) {
+        if (bplay){
     //    if (filePath.isEmpty()) {
      //       statusLabel->setText("Status: No sound file loaded");
     //        return;
@@ -231,7 +233,6 @@ if (grandclock->isChecked()){loaded=1;}
 
         }
 
-
         for (int i = 0; i < hour; ++i) {
             alSourcePlay(source);
 
@@ -248,10 +249,11 @@ if (grandclock->isChecked()){loaded=1;}
         // Clean up
         alDeleteSources(1, &source);
         alDeleteSources(1, &source2);
-        //alDeleteBuffers(1, &buffer);
+        alDeleteBuffers(1, &buffer);
         alDeleteBuffers(1, &buffer2);
         alutExit();
         statusLabel->setText("Status: Chime played");
+        }
     }
 
     bool loadWavFile(const char* filePath,ALuint &buffer) {
@@ -302,23 +304,19 @@ if (grandclock->isChecked()){loaded=1;}
         int hour = localTime->tm_hour % 12;
         if (hour == 0) hour = 12;  // Convert 0-hour to 12 for 12-hour format
 
-
         if (currentTime.minute() == 0 && currentTime.second() <= 10) {
             int hour12 = currentTime.hour() % 12;
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playSound(hour12);
-           //  bplay=true;
+            bplay=true;
         }else if (halfHourChime->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 10) {
             playSound(1); // Play one cuckoo sound for the half-hour chime
-           // bplay=true;
+            bplay=true;
+        }else{
+            bplay=false;
         }
 
-//        if (localTime->tm_min == 0 || (halfHourChime->isChecked() && localTime->tm_min == 30)) {
-//            playSound(hour);
-//        }
-//        if (localTime->tm_min == 0 || (halfHourChime->isChecked() && localTime->tm_min == 30)) {
-//            playSound(hour);
-//        }
+
     }
 
 private slots:
