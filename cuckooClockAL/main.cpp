@@ -267,7 +267,7 @@ loadWavFile("grandfclock.wav",buffer2);
         }
 
         for (int i = 0; i < hour; ++i) {
-            if (halfsound->isChecked()){
+            if (halfsound->isChecked() && halfhour){
         #ifndef __APPLE__
         loadWavFile("grandfclock.wav",buffer2);
         #else
@@ -282,16 +282,20 @@ loadWavFile("grandfclock.wav",buffer2);
         alSourcef(source2, AL_GAIN, value);
 
             alSourcePlay(source2);
-            }else
-               {  alSourcePlay(source);
-            }
+
+            ALint state;
+            do {
+                alGetSourcei(source2, AL_SOURCE_STATE, &state);
+            } while (state == AL_PLAYING);
+
+            }else               {  alSourcePlay(source);
 
             // Wait for the sound to finish playing
             ALint state;
             do {
                 alGetSourcei(source, AL_SOURCE_STATE, &state);
             } while (state == AL_PLAYING);
-
+            }
             // Optional: small delay between chimes
            // QThread::sleep(1);
         }
@@ -361,7 +365,7 @@ loadWavFile("grandfclock.wav",buffer2);
             if (hour12 == 0) hour12 = 12; // Convert 0 to 12 for 12-hour format
             playSound(hour12);
             bplay=false;
-        }else if (halfHourChime->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 10) {
+        }else if (halfHourChime->isChecked() && currentTime.minute() == 46 && currentTime.second() <= 10) {
              halfhour=true;
             playSound(1); // Play one cuckoo sound for the half-hour chime
             bplay=false;
