@@ -223,7 +223,11 @@ if (grandclock->isChecked()){loaded=1;}
         if (loaded && !halfhour ){
 
         loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
-
+#ifndef __APPLE__
+loadWavFile("grandfclock.wav",buffer2);
+#else
+loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+#endif
 
         alGenSources(1, &source2);
         alSourcei(source2, AL_BUFFER, buffer2);
