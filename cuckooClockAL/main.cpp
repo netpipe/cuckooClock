@@ -52,9 +52,6 @@ public:
         setupUI();
         setupTrayIcon();
         setupTimer();
-        loadSettings();
-      //    loaded = 1;
-
     }
 
     ~CuckooClock() {
@@ -73,6 +70,7 @@ private:
     QSettings *settings;
         QLabel *clockLabel;
 QSlider *volumeSlider;
+QCheckBox *grandclock;
 
     void setupUI() {
         auto *centralWidget = new QWidget(this);
@@ -82,6 +80,7 @@ QSlider *volumeSlider;
         connect(loadSoundButton, &QPushButton::clicked, this, &CuckooClock::loadSound);
 
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
+        grandclock = new QCheckBox("Enable grandclock", this);
 
         statusLabel = new QLabel("Status: Ready", this);
 
@@ -97,6 +96,7 @@ QSlider *volumeSlider;
 
         layout->addWidget(loadSoundButton);
         layout->addWidget(halfHourChime);
+        layout->addWidget(grandclock);
         layout->addWidget(statusLabel);
 
         setCentralWidget(centralWidget);
@@ -106,11 +106,13 @@ QSlider *volumeSlider;
 
 loadSettings();
 
+if (grandclock->isChecked()){loaded=1;}
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
+
 //playSound(1);
-        playSound(1);
+
     }
 
     void setupTrayIcon() {
@@ -154,10 +156,13 @@ loadSettings();
         settings = new QSettings("MyCompany", "CuckooClock", this);
         soundFile = settings->value("soundFile", "").toString();
         halfHourChime->setChecked(settings->value("halfHourChime", false).toBool());
+        grandclock->setChecked(settings->value("grandclock", false).toBool());
         volume = settings->value("volume", "").toFloat();
         //qDebug() << "test3" << volume;
         setVolume(volume);
         volumeSlider->setValue(volume);
+
+
 
        // if (soundFile.isEmpty()){
 #ifndef __APPLE__
@@ -176,6 +181,7 @@ loadSettings();
     void saveSettings() {
         settings->setValue("soundFile", soundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
+        settings->setValue("grandclock", grandclock->isChecked());
          qDebug() <<  "test" << volume;
         settings->setValue("volume", volume);
         qDebug() << settings->value("volume", "").toFloat();
@@ -200,9 +206,31 @@ loadSettings();
         alGenSources(1, &source);
         alSourcei(source, AL_BUFFER, buffer);
 
+
         float value = volume / 100.0f;
-        float newVolume = 0.4f;
         alSourcef(source, AL_GAIN, value);
+
+
+        ALuint buffer2;
+        ALuint source2;
+        if (loaded &&  !halfHourChime->isChecked() ){
+
+        loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+
+
+        alGenSources(1, &source2);
+        alSourcei(source2, AL_BUFFER, buffer2);
+
+        alSourcef(source2, AL_GAIN, value);
+        alSourcePlay(source2);
+        ALint state;
+            do {
+                alGetSourcei(source2, AL_SOURCE_STATE, &state);
+            } while (state == AL_PLAYING);
+
+
+        }
+
 
         for (int i = 0; i < hour; ++i) {
             alSourcePlay(source);
@@ -219,7 +247,9 @@ loadSettings();
 
         // Clean up
         alDeleteSources(1, &source);
-        alDeleteBuffers(1, &buffer);
+        alDeleteSources(1, &source2);
+        //alDeleteBuffers(1, &buffer);
+        alDeleteBuffers(1, &buffer2);
         alutExit();
         statusLabel->setText("Status: Chime played");
     }
@@ -312,6 +342,7 @@ saveSettings();
             this->hide();
             event->ignore();
         }
+        saveSettings();
     }
 
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason) {
