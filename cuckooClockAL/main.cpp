@@ -51,9 +51,10 @@ public:
     CuckooClock() {
         setupUI();
         setupTrayIcon();
-        loadSettings();
-          loaded = 1;
         setupTimer();
+        loadSettings();
+      //    loaded = 1;
+
     }
 
     ~CuckooClock() {
@@ -103,13 +104,13 @@ QSlider *volumeSlider;
         resize(300, 150);
 
 
-
+loadSettings();
 
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
 //playSound(1);
-        //playSound(4);
+        playSound(1);
     }
 
     void setupTrayIcon() {
