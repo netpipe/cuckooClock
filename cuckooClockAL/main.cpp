@@ -183,9 +183,15 @@ if (grandclock->isChecked()){loaded=1;}
         if (!loadWavFile("cuckoo.wav",buffer)) {
             loadWavFile(soundFile.toStdString().c_str(),buffer);
         }
+        if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
+             loadWavFile("grandfclock.wav",buffer2);
+        }
 #else
          if ( !loadWavFile(soundFile.toStdString().c_str(),buffer)) {
               loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer);
+         }
+         if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
+              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
          }
 #endif
 
@@ -195,7 +201,7 @@ if (grandclock->isChecked()){loaded=1;}
     void saveSettings() {
         qDebug() <<  "save settings";
         settings->setValue("soundFile", soundFile);
-        settings->setValue("grandsoundFile", soundFile);
+        settings->setValue("grandsoundFile", grandsoundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
         settings->setValue("grandclock", grandclock->isChecked());
        //  qDebug() <<  "test" << volume;
@@ -232,12 +238,11 @@ if (grandclock->isChecked()){loaded=1;}
         ALuint source2;
         if (loaded && !halfhour ){
 
-        //loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+       // loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
 #ifndef __APPLE__
 loadWavFile("grandfclock.wav",buffer2);
 #else
            if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
-
                 loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
            }
 #endif
@@ -282,6 +287,7 @@ loadWavFile("grandfclock.wav",buffer2);
     bool loadWavFile(const char* filePath,ALuint &buffer) {
         std::ifstream file(filePath, std::ios::binary);
         qDebug() << filePath;
+      //  QString test = filePath;
         if (!file.is_open()) {
             std::cerr << "Failed to open WAV file: " << filePath << std::endl;
             return 0;
