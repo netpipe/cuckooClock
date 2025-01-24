@@ -113,7 +113,7 @@ QPushButton *loadGrandSoundButton;
         layout->addWidget(statusLabel);
 
         setCentralWidget(centralWidget);
-        setWindowTitle("Cuckoo Clock");
+        setWindowTitle("GrandFather Clock");
         resize(300, 150);
 
 
