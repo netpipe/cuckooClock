@@ -22,6 +22,7 @@
 
 #include <QApplication>
 #include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 #include <QVBoxLayout>
 #include <QCheckBox>
 #include <QTimer>
@@ -60,11 +61,146 @@ bool halfhour=0;
         };
 
 
-        class ClockWidget : public QOpenGLWidget {
+        class ClockWidget : public QOpenGLWidget, protected QOpenGLFunctions {
             Q_OBJECT
 
         public:
             explicit ClockWidget(QWidget *parent = nullptr) : QOpenGLWidget(parent), is24HourMode(false) {
+                timer = new QTimer(this);
+                connect(timer, &QTimer::timeout, this, QOverload<>::of(&ClockWidget::update));
+                timer->start(1000); // Update every second
+            }
+
+            void set24HourMode(bool enabled) {
+                is24HourMode = enabled;
+                update();
+            }
+
+        protected:
+            void initializeGL() override {
+                initializeOpenGLFunctions();
+                glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            }
+
+            void resizeGL(int w, int h) override {
+                glViewport(0, 0, w, h);
+            }
+
+            void paintGL() override {
+                glClear(GL_COLOR_BUFFER_BIT);
+
+                glMatrixMode(GL_PROJECTION);
+                glLoadIdentity();
+                glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+
+                drawClockFace();
+                drawClockHands();
+            }
+
+        private:
+            QTimer *timer;
+            bool is24HourMode;
+
+            void drawClockFace() {
+                glColor3f(0.0f, 0.0f, 0.0f);
+
+                // Draw hour markers
+                for (int i = 0; i < 60; ++i) {
+                    glPushMatrix();
+                    glRotatef(i * 6.0f, 0.0f, 0.0f, 1.0f);
+
+                    if (i % 5 == 0) {
+                        glBegin(GL_LINES);
+                        glVertex2f(0.0f, 0.9f);
+                        glVertex2f(0.0f, 0.8f);
+                        glEnd();
+                    } else {
+                        glBegin(GL_LINES);
+                        glVertex2f(0.0f, 0.9f);
+                        glVertex2f(0.0f, 0.85f);
+                        glEnd();
+                    }
+
+                    glPopMatrix();
+                }
+
+                // Draw numbers using QPainter
+                QPainter painter(this);
+                painter.setRenderHint(QPainter::Antialiasing);
+                painter.setPen(Qt::black);
+                QFont font("Arial", 10);
+                painter.setFont(font);
+
+                for (int i = 1; i <= (is24HourMode ? 24 : 12); ++i) {
+                    float angle = qDegreesToRadians(360.0f / (is24HourMode ? 24.0f : 12.0f) * i - 90.0f);
+                    float x = 0.75f * qCos(angle);
+                    float y = 0.75f * qSin(angle);
+
+                    QPointF position(width() / 2 + x * width() / 2, height() / 2 + y * height() / 2);
+                    painter.drawText(position, QString::number(i));
+                }
+
+                painter.end();
+            }
+
+
+            void drawClockHands() {
+                QTime time = QTime::currentTime();
+
+                // Hour hand
+                glColor3f(0.0f, 0.0f, 0.0f);
+                glPushMatrix();
+                int hours = time.hour();
+                if (!is24HourMode) {
+                    hours = hours % 12;
+                }
+                float hourAngle = -30.0f * (hours % (is24HourMode ? 24 : 12)) - time.minute() / 2.0f;
+                glRotatef(hourAngle, 0.0f, 0.0f, 1.0f);
+                glBegin(GL_QUADS);
+                glVertex2f(-0.02f, 0.0f);
+                glVertex2f(0.02f, 0.0f);
+                glVertex2f(0.01f, 0.5f);
+                glVertex2f(-0.01f, 0.5f);
+                glEnd();
+                glPopMatrix();
+
+                // Minute hand
+                glColor3f(0.0f, 0.0f, 0.0f);
+                glPushMatrix();
+                float minuteAngle = -6.0f * time.minute() - time.second() / 10.0f;
+                glRotatef(minuteAngle, 0.0f, 0.0f, 1.0f);
+                glBegin(GL_QUADS);
+                glVertex2f(-0.015f, 0.0f);
+                glVertex2f(0.015f, 0.0f);
+                glVertex2f(0.01f, 0.7f);
+                glVertex2f(-0.01f, 0.7f);
+                glEnd();
+                glPopMatrix();
+
+                // Second hand
+                glColor3f(1.0f, 0.0f, 0.0f);
+                glPushMatrix();
+                float secondAngle = -6.0f * time.second();
+                glRotatef(secondAngle, 0.0f, 0.0f, 1.0f);
+                glBegin(GL_QUADS);
+                glVertex2f(-0.01f, 0.0f);
+                glVertex2f(0.01f, 0.0f);
+                glVertex2f(0.005f, 0.8f);
+                glVertex2f(-0.005f, 0.8f);
+                glEnd();
+                glPopMatrix();
+            }
+};
+
+
+        class ClockWidget2 : public QOpenGLWidget {
+            Q_OBJECT
+
+        public:
+            explicit ClockWidget2(QWidget *parent = nullptr) : QOpenGLWidget(parent), is24HourMode(false) {
                 timer = new QTimer(this);
                 connect(timer, &QTimer::timeout, this, QOverload<>::of(&ClockWidget::update));
                 timer->start(1000); // Update every second
