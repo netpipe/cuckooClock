@@ -190,7 +190,7 @@ if (grandclock->isChecked()){loaded=1;}
     }
 
     void playSound(int hour) {
-        if (bplay){
+        if (!bplay){
     //    if (filePath.isEmpty()) {
      //       statusLabel->setText("Status: No sound file loaded");
     //        return;
