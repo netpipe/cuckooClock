@@ -29,6 +29,7 @@
         float volume;
 bool loaded=0;
 bool bplay=0;
+bool halfhour=0;
         struct WAVHeader {
             char riff[4];
             uint32_t chunkSize;
@@ -215,7 +216,7 @@ if (grandclock->isChecked()){loaded=1;}
 
         ALuint buffer2;
         ALuint source2;
-        if (loaded &&  !halfHourChime->isChecked() ){
+        if (loaded &&  !halfHourChime->isChecked() && !halfhour ){
 
         loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock.wav",buffer2);
 
@@ -310,10 +311,12 @@ if (grandclock->isChecked()){loaded=1;}
             playSound(hour12);
             bplay=false;
         }else if (halfHourChime->isChecked() && currentTime.minute() == 30 && currentTime.second() <= 10) {
+             halfhour=true;
             playSound(1); // Play one cuckoo sound for the half-hour chime
             bplay=false;
         }else{
             bplay=true;
+            halfhour=false;
         }
 
 
