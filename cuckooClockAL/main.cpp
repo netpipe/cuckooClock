@@ -184,6 +184,7 @@ if (grandclock->isChecked()){loaded=1;}
     }
 
     void saveSettings() {
+        qDebug() <<  "save settings";
         settings->setValue("soundFile", soundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
         settings->setValue("grandclock", grandclock->isChecked());
@@ -337,12 +338,14 @@ QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Appli
 
 
 loadWavFile(file.toLatin1(),buffer);
-      //  if (!loadWavFile(soundFile.toStdString().c_str(),buffer) ) {
+      //  if (!loadWavFile(file.toLatin1(),buffer) ) {
       //      statusLabel->setText("Status: Failed to load sound file");
         //    return;
        // }
 soundFile = file.toLatin1();
+if (!soundFile.isEmpty()){
 saveSettings();
+}
 //        if (!file.isEmpty()) {
 //            soundFile = file;
            statusLabel->setText("Status: Sound file loaded");
