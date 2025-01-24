@@ -120,7 +120,7 @@ if (grandclock->isChecked()){loaded=1;}
     void setupTrayIcon() {
         trayIcon = new QSystemTrayIcon(this);
 #ifdef __APPLE__
-        trayIcon->setIcon(QIcon("/Applications/cuckooClock.app/Contents/MacOS/icon.png"));
+        trayIcon->setIcon(QIcon("/Applications/grandFatherClock.app/Contents/MacOS/icon.png"));
 #else
         trayIcon->setIcon(QIcon("icon.png"));
 #endif
@@ -155,7 +155,7 @@ if (grandclock->isChecked()){loaded=1;}
     }
 
     void loadSettings() {
-        settings = new QSettings("MyCompany", "CuckooClock", this);
+        settings = new QSettings("MyCompany", "grandFatherClock", this);
         soundFile = settings->value("soundFile", "").toString();
         halfHourChime->setChecked(settings->value("halfHourChime", false).toBool());
         grandclock->setChecked(settings->value("grandclock", false).toBool());
@@ -172,7 +172,7 @@ if (grandclock->isChecked()){loaded=1;}
             loadWavFile(soundFile.toStdString().c_str(),buffer);
         }
 #else
-         if (!loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock-chime.wav",buffer)) {
+         if (!loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer)) {
              loadWavFile(soundFile.toStdString().c_str(),buffer);
          }
 #endif
@@ -218,7 +218,7 @@ if (grandclock->isChecked()){loaded=1;}
         ALuint source2;
         if (loaded && !halfhour ){
 
-        loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+        loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
 
 
         alGenSources(1, &source2);
