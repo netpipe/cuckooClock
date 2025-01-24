@@ -216,7 +216,7 @@ if (grandclock->isChecked()){loaded=1;}
 
         ALuint buffer2;
         ALuint source2;
-        if (loaded &&  !halfHourChime->isChecked() && !halfhour ){
+        if (loaded && !halfhour ){
 
         loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/grandfclock.wav",buffer2);
 
