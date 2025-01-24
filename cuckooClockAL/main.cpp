@@ -87,6 +87,7 @@ bool halfhour=0;
             }
 
             void paintGL() override {
+                if (this->isVisible()){
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 glMatrixMode(GL_PROJECTION);
@@ -98,6 +99,7 @@ bool halfhour=0;
 
                 drawClockFace();
                 drawClockHands();
+                }
             }
 
         private:
@@ -331,7 +333,10 @@ private:
         connect(loadGrandSoundButton, &QPushButton::clicked, this, &CuckooClock::loadGrandSound);
 
         clockWidget = new ClockWidget(this);
+        clockWidget->resize(500,500);
 layout->addWidget(clockWidget);
+
+
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
         grandclock = new QCheckBox("Enable grandclock", this);
         halfsound = new QCheckBox("Enable grand halfhour chime", this);
@@ -344,7 +349,7 @@ layout->addWidget(clockWidget);
         clockLabel = new QLabel(this);
         clockLabel->setAlignment(Qt::AlignCenter);
         clockLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
-        layout->addWidget(clockLabel);
+layout->addWidget(clockLabel);
 
         volumeSlider = new QSlider(Qt::Horizontal, this);
         volumeSlider->setRange(0, 100);
@@ -358,21 +363,23 @@ layout->addWidget(clockWidget);
         layout->addWidget(halfHourChime);
         layout->addWidget(grandclock);
          layout->addWidget(halfsound);
-        layout->addWidget(statusLabel);
+       // layout->addWidget(statusLabel);
 
         setCentralWidget(centralWidget);
         setWindowTitle("GrandFather Clock");
         resize(300, 150);
 
 
-loadSettings();
+        loadSettings();
 
-if (grandclock->isChecked()){loaded=1;}
+        bplay=1;
+        //playSound(1);
+
+        if (grandclock->isChecked()){loaded=1;}
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
 
-//playSound(1);
 
     }
 
@@ -476,16 +483,19 @@ if (grandclock->isChecked()){loaded=1;}
         }
 
         ALuint source;
+        ALuint source2;
+
         alGenSources(1, &source);
         alSourcei(source, AL_BUFFER, buffer);
 
 
         float value = volume / 100.0f;
+
+       // alSourcef(source, AL_MAX_GAIN, 4);
+       // alSourcef(source2, AL_MAX_GAIN, 4);
         alSourcef(source, AL_GAIN, value);
 
 
-
-        ALuint source2;
         if (loaded && !halfhour ){
 
        // loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
@@ -496,7 +506,7 @@ loadWavFile("grandfclock.wav",buffer2);
                 loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
            }
 #endif
-
+//alSourcef( source2, AL_REFERENCE_DISTANCE, 100.0f );
         alGenSources(1, &source2);
         alSourcei(source2, AL_BUFFER, buffer2);
 
@@ -511,7 +521,7 @@ loadWavFile("grandfclock.wav",buffer2);
         }
 
         for (int i = 0; i < hour; ++i) {
-            if (halfsound->isChecked() && halfhour){
+            if (loaded && halfsound->isChecked() && halfhour){
         #ifndef __APPLE__
         loadWavFile("grandfclock.wav",buffer2);
         #else
@@ -532,7 +542,9 @@ loadWavFile("grandfclock.wav",buffer2);
                 alGetSourcei(source2, AL_SOURCE_STATE, &state);
             } while (state == AL_PLAYING);
 
-            }else               {  alSourcePlay(source);
+            }else {
+//alSourcef( source, AL_REFERENCE_DISTANCE, 100.0f );
+            alSourcePlay(source);
 
             // Wait for the sound to finish playing
             ALint state;
