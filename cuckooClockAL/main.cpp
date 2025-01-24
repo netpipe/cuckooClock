@@ -380,7 +380,7 @@ private:
         loadSettings();
 
         bplay=1;
-        playSound(1);
+       // playSound(1);
 
         if (grandclock->isChecked()){loaded=1;}
      //    volumeSlider->setValue(100);
