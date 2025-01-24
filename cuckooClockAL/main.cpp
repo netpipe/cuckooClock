@@ -17,6 +17,7 @@
 #include <QThread>
 #include <AL/alut.h>
 #include <QDebug>
+#include <QSlider>
 
 
 
@@ -25,7 +26,8 @@
 #include <iostream>
 
         ALuint buffer;
-
+        float volume;
+bool loaded=0;
         struct WAVHeader {
             char riff[4];
             uint32_t chunkSize;
@@ -50,6 +52,7 @@ public:
         setupUI();
         setupTrayIcon();
         loadSettings();
+          loaded = 1;
         setupTimer();
     }
 
@@ -68,6 +71,7 @@ private:
     QTimer *clockTimer;
     QSettings *settings;
         QLabel *clockLabel;
+QSlider *volumeSlider;
 
     void setupUI() {
         auto *centralWidget = new QWidget(this);
@@ -85,6 +89,10 @@ private:
         clockLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
         layout->addWidget(clockLabel);
 
+        volumeSlider = new QSlider(Qt::Horizontal, this);
+        volumeSlider->setRange(0, 100);
+        layout->addWidget(volumeSlider);
+        connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClock::setVolume);
 
         layout->addWidget(loadSoundButton);
         layout->addWidget(halfHourChime);
@@ -93,7 +101,11 @@ private:
         setCentralWidget(centralWidget);
         setWindowTitle("Cuckoo Clock");
         resize(300, 150);
-        loadSettings();
+
+
+
+
+     //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
 //playSound(1);
@@ -119,32 +131,54 @@ private:
         connect(trayIcon, &QSystemTrayIcon::activated, this, &CuckooClock::onTrayIconActivated);
     }
 
+    void setVolume(float value) {
+        //if (loaded) {
+        volume = value;// / 100.0f; // Convert to 0.0 - 1.0 range
+ //volumeSlider->setValue(volume);
+ //qDebug() << value;
+       // volume = volume;
+       // saveVolume(value);
+
+        saveSettings();
+//}
+    }
+
     void setupTimer() {
         clockTimer = new QTimer(this);
         connect(clockTimer, &QTimer::timeout, this, &CuckooClock::checkTime);
-        clockTimer->start(1000); // Check every second
+        clockTimer->start(500); // Check every second
     }
 
     void loadSettings() {
         settings = new QSettings("MyCompany", "CuckooClock", this);
         soundFile = settings->value("soundFile", "").toString();
         halfHourChime->setChecked(settings->value("halfHourChime", false).toBool());
+        volume = settings->value("volume", "").toFloat();
+        //qDebug() << "test3" << volume;
+        setVolume(volume);
+        volumeSlider->setValue(volume);
+
        // if (soundFile.isEmpty()){
 #ifndef __APPLE__
-            loadWavFile("cuckoo.wav",buffer);
+        if (!loadWavFile("cuckoo.wav",buffer)) {
+            loadWavFile(soundFile.toStdString().c_str(),buffer);
+        }
 #else
-         loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav",buffer);
+         if (!loadWavFile("/Applications/cuckooClock.app/Contents/MacOS/cuckoo.wav",buffer)) {
+             loadWavFile(soundFile.toStdString().c_str(),buffer);
+         }
 #endif
-      //      return;
-       // }    else {
-        loadWavFile(soundFile.toStdString().c_str(),buffer);
-        //}
+
 
     }
 
     void saveSettings() {
         settings->setValue("soundFile", soundFile);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
+         qDebug() <<  "test" << volume;
+        settings->setValue("volume", volume);
+        qDebug() << settings->value("volume", "").toFloat();
+
     }
 
     void playSound(int hour) {
@@ -164,6 +198,10 @@ private:
         ALuint source;
         alGenSources(1, &source);
         alSourcei(source, AL_BUFFER, buffer);
+
+        float value = volume / 100.0f;
+        float newVolume = 0.4f;
+        alSourcef(source, AL_GAIN, value);
 
         for (int i = 0; i < hour; ++i) {
             alSourcePlay(source);
@@ -185,12 +223,12 @@ private:
         statusLabel->setText("Status: Chime played");
     }
 
-    void loadWavFile(const char* filePath,ALuint &buffer) {
+    bool loadWavFile(const char* filePath,ALuint &buffer) {
         std::ifstream file(filePath, std::ios::binary);
         qDebug() << filePath;
         if (!file.is_open()) {
             std::cerr << "Failed to open WAV file: " << filePath << std::endl;
-            return;
+            return 0;
         }
 
         WAVHeader header;
@@ -198,7 +236,7 @@ private:
 
         if (std::strncmp(header.riff, "RIFF", 4) != 0 || std::strncmp(header.wave, "WAVE", 4) != 0) {
             std::cerr << "Invalid WAV file format: " << filePath << std::endl;
-            return;
+            return 0;
         }
 
         ALenum format;
@@ -208,7 +246,7 @@ private:
             format = (header.bitsPerSample == 8) ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
         } else {
             std::cerr << "Unsupported channel count: " << header.numChannels << std::endl;
-            return ;
+            return 0;
         }
 
         std::vector<char> data(header.dataSize);
