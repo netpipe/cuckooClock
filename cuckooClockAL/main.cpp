@@ -83,6 +83,8 @@ QCheckBox *grandclock;
 
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
         grandclock = new QCheckBox("Enable grandclock", this);
+        grandclock->setChecked(1);
+        halfHourChime->setChecked(1);
 
         statusLabel = new QLabel("Status: Ready", this);
 
@@ -93,6 +95,7 @@ QCheckBox *grandclock;
 
         volumeSlider = new QSlider(Qt::Horizontal, this);
         volumeSlider->setRange(0, 100);
+        volumeSlider->setValue(100);
         layout->addWidget(volumeSlider);
         connect(volumeSlider, &QSlider::valueChanged, this, &CuckooClock::setVolume);
 
@@ -324,7 +327,15 @@ if (grandclock->isChecked()){loaded=1;}
 
 private slots:
     void loadSound() {
-        QString file = QFileDialog::getOpenFileName(this, "Select WAV File", "", "WAV Files (*.wav)");
+
+
+#ifdef __APPLE__
+QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/grandFatherClock.app/Contents/MacOS/", "Sound Files (*.wav)");
+#else
+ QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
+#endif
+
+
 loadWavFile(file.toLatin1(),buffer);
       //  if (!loadWavFile(soundFile.toStdString().c_str(),buffer) ) {
       //      statusLabel->setText("Status: Failed to load sound file");
