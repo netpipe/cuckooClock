@@ -19,6 +19,13 @@
 #include <QDebug>
 #include <QSlider>
 
+template <typename T>
+T clamp(T value, T min, T max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
 
 #include <QApplication>
 #include <QOpenGLWidget>
@@ -334,7 +341,7 @@ private:
 
         clockWidget = new ClockWidget(this);
         clockWidget->resize(500,500);
-layout->addWidget(clockWidget);
+        layout->addWidget(clockWidget);
 
 
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
@@ -349,7 +356,7 @@ layout->addWidget(clockWidget);
         clockLabel = new QLabel(this);
         clockLabel->setAlignment(Qt::AlignCenter);
         clockLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
-layout->addWidget(clockLabel);
+        layout->addWidget(clockLabel);
 
         volumeSlider = new QSlider(Qt::Horizontal, this);
         volumeSlider->setRange(0, 100);
@@ -432,12 +439,10 @@ layout->addWidget(clockLabel);
         setVolume(volume);
         volumeSlider->setValue(volume);
 
-
-
        // if (soundFile.isEmpty()){
 #ifndef __APPLE__
-        if (!loadWavFile("cuckoo.wav",buffer)) {
-            loadWavFile(soundFile.toStdString().c_str(),buffer);
+        if (!loadWavFile(soundFile.toStdString().c_str(),buffer)) {
+            loadWavFile("cuckoo.wav",buffer);
         }
         if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
              loadWavFile("grandfclock.wav",buffer2);
@@ -461,10 +466,7 @@ layout->addWidget(clockLabel);
         settings->setValue("halfHourChime", halfHourChime->isChecked());
         settings->setValue("halfsound", halfsound->isChecked());
         settings->setValue("grandclock", grandclock->isChecked());
-       //  qDebug() <<  "test" << volume;
         settings->setValue("volume", volume);
-       // qDebug() << settings->value("volume", "").toFloat();
-
     }
 
     bool playSound(int hour) {
@@ -484,34 +486,30 @@ layout->addWidget(clockLabel);
 
         ALuint source;
         ALuint source2;
-
         alGenSources(1, &source);
         alSourcei(source, AL_BUFFER, buffer);
 
-
         float value = volume / 100.0f;
-
        // alSourcef(source, AL_MAX_GAIN, 4);
        // alSourcef(source2, AL_MAX_GAIN, 4);
         alSourcef(source, AL_GAIN, value);
 
-
         if (loaded && !halfhour ){
-
        // loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
-#ifndef __APPLE__
-loadWavFile("grandfclock.wav",buffer2);
-#else
+        #ifndef __APPLE__
+        loadWavFile("grandfclock.wav",buffer2);
+        #else
            if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
                 loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
            }
-#endif
-//alSourcef( source2, AL_REFERENCE_DISTANCE, 100.0f );
+        #endif
+        //alSourcef( source2, AL_REFERENCE_DISTANCE, 100.0f );
         alGenSources(1, &source2);
         alSourcei(source2, AL_BUFFER, buffer2);
 
         alSourcef(source2, AL_GAIN, value);
         alSourcePlay(source2);
+
         ALint state;
             do {
                 alGetSourcei(source2, AL_SOURCE_STATE, &state);
@@ -532,9 +530,7 @@ loadWavFile("grandfclock.wav",buffer2);
 
         alGenSources(1, &source2);
         alSourcei(source2, AL_BUFFER, buffer2);
-
         alSourcef(source2, AL_GAIN, value);
-
             alSourcePlay(source2);
 
             ALint state;
@@ -543,20 +539,17 @@ loadWavFile("grandfclock.wav",buffer2);
             } while (state == AL_PLAYING);
 
             }else {
-//alSourcef( source, AL_REFERENCE_DISTANCE, 100.0f );
+            //alSourcef( source, AL_REFERENCE_DISTANCE, 100.0f );
             alSourcePlay(source);
 
-            // Wait for the sound to finish playing
             ALint state;
             do {
                 alGetSourcei(source, AL_SOURCE_STATE, &state);
             } while (state == AL_PLAYING);
             }
-            // Optional: small delay between chimes
            // QThread::sleep(1);
         }
 
-        // Clean up
         alDeleteSources(1, &source);
         alDeleteSources(1, &source2);
       //  alDeleteBuffers(1, &buffer);
@@ -565,6 +558,26 @@ loadWavFile("grandfclock.wav",buffer2);
         statusLabel->setText("Status: Chime played");
         }
         return 1;
+    }
+
+    void amplifyAudioData(std::vector<char>& data, int bitsPerSample, float gain) {
+        if (gain <= 1.0f) return; // No need to amplify if gain is 1 or less
+
+        if (bitsPerSample == 8) {
+            // 8-bit PCM is unsigned (0 to 255)
+            for (auto& sample : data) {
+                int amplified = static_cast<int>(sample - 128) * gain + 128;
+                sample = clamp(amplified, 0, 255);
+            }
+        } else if (bitsPerSample == 16) {
+            // 16-bit PCM is signed (-32768 to 32767)
+            int16_t* samples = reinterpret_cast<int16_t*>(data.data());
+            size_t sampleCount = data.size() / sizeof(int16_t);
+            for (size_t i = 0; i < sampleCount; ++i) {
+                int amplified = static_cast<int>(samples[i] * gain);
+                samples[i] = clamp(amplified, -32768, 32767);
+            }
+        }
     }
 
     bool loadWavFile(const char* filePath,ALuint &buffer) {
@@ -600,6 +613,9 @@ loadWavFile("grandfclock.wav",buffer2);
 
         //ALuint buffer;
         alGenBuffers(1, &buffer);
+        if ((volume / 100) > 1.0f) {
+        //    amplifyAudioData(data, header.bitsPerSample, (volume / 100));
+        }
         alBufferData(buffer, format, data.data(), header.dataSize, header.sampleRate);
 
         return 1;
@@ -637,22 +653,22 @@ private slots:
     void loadSound() {
 
 
-    #ifdef __APPLE__
-    QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/grandFatherClock.app/Contents/MacOS/", "Sound Files (*.wav)");
-    #else
-     QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
-    #endif
+        #ifdef __APPLE__
+        QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/grandFatherClock.app/Contents/MacOS/", "Sound Files (*.wav)");
+        #else
+         QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
+        #endif
 
 
-    loadWavFile(file.toLatin1(),buffer);
-      //  if (!loadWavFile(file.toLatin1(),buffer) ) {
-      //      statusLabel->setText("Status: Failed to load sound file");
-        //    return;
-       // }
-    soundFile = file.toLatin1();
-    if (!soundFile.isEmpty()){
-    saveSettings();
-    }
+        loadWavFile(file.toLatin1(),buffer);
+          //  if (!loadWavFile(file.toLatin1(),buffer) ) {
+          //      statusLabel->setText("Status: Failed to load sound file");
+            //    return;
+           // }
+        soundFile = file.toLatin1();
+        if (!soundFile.isEmpty()){
+            saveSettings();
+        }
 //        if (!file.isEmpty()) {
 //            soundFile = file;
            statusLabel->setText("Status: Sound file loaded");
@@ -663,9 +679,9 @@ private slots:
 
 
     #ifdef __APPLE__
-    QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/grandFatherClock.app/Contents/MacOS/", "Sound Files (*.wav)");
+        QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "/Applications/grandFatherClock.app/Contents/MacOS/", "Sound Files (*.wav)");
     #else
-     QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
+        QString file = QFileDialog::getOpenFileName(this, "Select Cuckoo Sound", "./", "Sound Files (*.wav)");
     #endif
 
 
