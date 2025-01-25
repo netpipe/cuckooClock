@@ -388,8 +388,8 @@ private:
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
-playSound(12);
-playSound(9);
+//playSound(12);
+//playSound(9);
 
     }
 
