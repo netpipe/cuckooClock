@@ -43,8 +43,8 @@ T clamp(T value, T min, T max) {
 #include <fstream>
 #include <iostream>
 
-        ALuint buffer;
-        ALuint buffer2;
+        //ALuint buffer;
+        //ALuint buffer2;
         float volume;
 bool loaded=0;
 bool bplay=0;
@@ -106,6 +106,8 @@ bool halfhour=0;
 
                 drawClockFace();
                 drawClockHands();
+                } else {
+                //QThread::sleep(1);
                 }
             }
 
@@ -386,7 +388,8 @@ private:
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
-
+//playSound(12);
+//playSound(9);
 
     }
 
@@ -440,23 +443,6 @@ private:
         volumeSlider->setValue(volume);
 
        // if (soundFile.isEmpty()){
-#ifndef __APPLE__
-        if (!loadWavFile(soundFile.toStdString().c_str(),buffer)) {
-            loadWavFile("cuckoo.wav",buffer);
-        }
-        if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
-             loadWavFile("grandfclock.wav",buffer2);
-        }
-#else
-         if ( !loadWavFile(soundFile.toStdString().c_str(),buffer)) {
-              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer);
-         }
-         if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
-              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
-         }
-#endif
-
-
     }
 
     void saveSettings() {
@@ -477,8 +463,18 @@ private:
      //   }
         alutInit(nullptr, nullptr);
 
-       // ALuint buffer =
+        ALuint buffer;
+        ALuint buffer2;
               //  loadWavFile(filePath,buffer);
+#ifndef __APPLE__
+        if (!loadWavFile(soundFile.toStdString().c_str(),buffer)) {
+            loadWavFile("grandfclock-chime.wav",buffer);
+        }
+#else
+         if ( !loadWavFile(soundFile.toStdString().c_str(),buffer)) {
+              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer);
+         }
+#endif
         if (buffer == AL_NONE) {
             alutExit();
             return 0;
@@ -552,7 +548,7 @@ private:
 
         alDeleteSources(1, &source);
         alDeleteSources(1, &source2);
-      //  alDeleteBuffers(1, &buffer);
+        alDeleteBuffers(1, &buffer);
         alDeleteBuffers(1, &buffer2);
         alutExit();
         statusLabel->setText("Status: Chime played");
@@ -660,7 +656,7 @@ private slots:
         #endif
 
 
-        loadWavFile(file.toLatin1(),buffer);
+        //loadWavFile(file.toLatin1(),buffer);
           //  if (!loadWavFile(file.toLatin1(),buffer) ) {
           //      statusLabel->setText("Status: Failed to load sound file");
             //    return;
@@ -685,7 +681,7 @@ private slots:
     #endif
 
 
-    loadWavFile(file.toLatin1(),buffer2);
+   // loadWavFile(file.toLatin1(),buffer2);
       //  if (!loadWavFile(file.toLatin1(),buffer) ) {
       //      statusLabel->setText("Status: Failed to load sound file");
         //    return;
