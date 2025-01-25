@@ -342,8 +342,8 @@ private:
         connect(loadGrandSoundButton, &QPushButton::clicked, this, &CuckooClock::loadGrandSound);
 
         clockWidget = new ClockWidget(this);
-        clockWidget->resize(500,500);
-        layout->addWidget(clockWidget);
+        clockWidget->resize(200,200);
+        //layout->addWidget(clockWidget);
 
 
         halfHourChime = new QCheckBox("Enable Half-Hour Chime", this);
