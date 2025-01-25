@@ -388,8 +388,8 @@ private:
      //    volumeSlider->setValue(100);
        // loadWavFile("cuckoo.wav",buffer);
         // loadWavFile(soundFile.toStdString().c_str(),buffer);
-//playSound(12);
-//playSound(9);
+playSound(12);
+playSound(9);
 
     }
 
@@ -462,28 +462,31 @@ private:
     //        return;
      //   }
         alutInit(nullptr, nullptr);
-
+        ALuint source;
+       // ALuint source2;
         ALuint buffer;
         ALuint buffer2;
+        alGenSources(1, &source);
+
+
               //  loadWavFile(filePath,buffer);
 #ifndef __APPLE__
-        if (!loadWavFile(soundFile.toStdString().c_str(),buffer)) {
-            loadWavFile("grandfclock-chime.wav",buffer);
+        if (!loadWavFile(soundFile.toStdString().c_str(),buffer,source)) {
+            loadWavFile("grandfclock-chime.wav",buffer,source);
         }
 #else
-         if ( !loadWavFile(soundFile.toStdString().c_str(),buffer)) {
-              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer);
+         if ( !loadWavFile(soundFile.toStdString().c_str(),buffer,source)) {
+              loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock-chime.wav",buffer,source);
          }
 #endif
+
+         alSourcei(source, AL_BUFFER, buffer);
         if (buffer == AL_NONE) {
             alutExit();
             return 0;
         }
 
-        ALuint source;
-        ALuint source2;
-        alGenSources(1, &source);
-        alSourcei(source, AL_BUFFER, buffer);
+
 
         float value = volume / 100.0f;
        // alSourcef(source, AL_MAX_GAIN, 4);
@@ -491,24 +494,27 @@ private:
         alSourcef(source, AL_GAIN, value);
 
         if (loaded && !halfhour ){
-       // loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+       // loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2,source);
+
+          //  alGenSources(1, &source2);
+
         #ifndef __APPLE__
         loadWavFile("grandfclock.wav",buffer2);
         #else
-           if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
-                loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+           if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2,source)) {
+                loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2,source);
            }
         #endif
         //alSourcef( source2, AL_REFERENCE_DISTANCE, 100.0f );
-        alGenSources(1, &source2);
-        alSourcei(source2, AL_BUFFER, buffer2);
+        alSourcei(source, AL_BUFFER, buffer2);
 
-        alSourcef(source2, AL_GAIN, value);
-        alSourcePlay(source2);
+
+        alSourcef(source, AL_GAIN, value);
+        alSourcePlay(source);
 
         ALint state;
             do {
-                alGetSourcei(source2, AL_SOURCE_STATE, &state);
+                alGetSourcei(source, AL_SOURCE_STATE, &state);
             } while (state == AL_PLAYING);
 
 
@@ -516,25 +522,28 @@ private:
 
         for (int i = 0; i < hour; ++i) {
             if (loaded && halfsound->isChecked() && halfhour){
+               // alGenSources(1, &source2);
+
         #ifndef __APPLE__
         loadWavFile("grandfclock.wav",buffer2);
         #else
-                   if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2)) {
-                        loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2);
+                   if (!loadWavFile(grandsoundFile.toStdString().c_str(),buffer2,source)) {
+                        loadWavFile("/Applications/grandFatherClock.app/Contents/MacOS/grandfclock.wav",buffer2,source);
                    }
         #endif
 
-        alGenSources(1, &source2);
-        alSourcei(source2, AL_BUFFER, buffer2);
-        alSourcef(source2, AL_GAIN, value);
-            alSourcePlay(source2);
+
+            alSourcei(source, AL_BUFFER, buffer2);
+            alSourcef(source, AL_GAIN, value);
+            alSourcePlay(source);
 
             ALint state;
             do {
-                alGetSourcei(source2, AL_SOURCE_STATE, &state);
+                alGetSourcei(source, AL_SOURCE_STATE, &state);
             } while (state == AL_PLAYING);
 
             }else {
+                alSourcei(source, AL_BUFFER, buffer);
             //alSourcef( source, AL_REFERENCE_DISTANCE, 100.0f );
             alSourcePlay(source);
 
@@ -547,7 +556,7 @@ private:
         }
 
         alDeleteSources(1, &source);
-        alDeleteSources(1, &source2);
+      //  alDeleteSources(1, &source2);
         alDeleteBuffers(1, &buffer);
         alDeleteBuffers(1, &buffer2);
         alutExit();
@@ -576,7 +585,7 @@ private:
         }
     }
 
-    bool loadWavFile(const char* filePath,ALuint &buffer) {
+    bool loadWavFile(const char* filePath,ALuint &buffer,ALuint &source) {
         std::ifstream file(filePath, std::ios::binary);
         qDebug() << filePath;
       //  QString test = filePath;
@@ -612,7 +621,20 @@ private:
         if ((volume / 100) > 1.0f) {
             amplifyAudioData(data, header.bitsPerSample, (volume / 100));
         }
-        alBufferData(buffer, format, data.data(), header.dataSize, header.sampleRate);
+
+//        ALint processed;
+//        alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+
+//        while (processed--) {
+//            ALuint buffer;
+//            alSourceUnqueueBuffers(source, 1, &buffer);
+//            // Reload buffer data if necessary here
+//            alBufferData(buffer, format, data.data(), header.dataSize, header.sampleRate);
+
+//           // alBufferData(buffer, format, data, size, frequency);
+//            alSourceQueueBuffers(source, 1, &buffer);
+//        }
+alBufferData(buffer, format, data.data(), header.dataSize, header.sampleRate);
 
         return 1;
     }
