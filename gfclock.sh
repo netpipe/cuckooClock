@@ -15,16 +15,19 @@ play_chime() {
     
     if [[ "$minute" == "00" ]]; then
  	   afplay "$HOUR_START" -v $vol
+say "the time is now" + $hour
         # Play hour chime for the number of hours
         for ((i=1; i<=hour; i++)); do
-	   echo $hour
+	   #echo $hour
+		
             afplay "$HOUR_SOUND" -v $vol
             #sleep 1  # Small delay between chimes
         done
 	sleep 200
     elif [[ "$minute" == "30" ]]; then
         # Play half-hour chime
-        afplay "$HALF_HOUR_SOUND" -v $vol
+say $hour + "thirty"//$minute
+        afplay "$HALF_HOUR_SOUND" -v $vol/2
 	sleep 200
     fi
 
