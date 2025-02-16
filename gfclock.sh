@@ -8,7 +8,7 @@ fourtyfive_SOUND="./grandfclock-chime.wav"
 HALF_HOUR_SOUND="./grandfclock-chime.wav"
 vol=3
 mac=true
-fourminchimes=false
+fourminchimes=true
 # Function to play the chime sound based on the time
 play_chime() {
     #local hour=$(date +"%I")  # Get the current hour (12-hour format)
