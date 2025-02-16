@@ -34,7 +34,7 @@ play_chime() {
         done
 	sleep 200
 fi
-if [ $thirtychime ]; then
+if $thirtychime; then
     if [[ "$minute" == "30" ]]; then
         # Play half-hour chime
 	if [ $mac ]; then
@@ -46,7 +46,7 @@ if [ $thirtychime ]; then
 	sleep 200
     fi
 fi
-if [ $fourminchimes ]; then
+if $fourminchimes ; then
     if [[ "$minute" == "15" ]]; then
         # Play half-hour chime
 	if [ $mac ]; then
