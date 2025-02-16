@@ -2,7 +2,7 @@
 
 # Paths to sound files (modify these as needed)
 HOUR_START="./grandfclock.wav"
-HOUR_SOUND="./grandfclock.wav"
+HOUR_SOUND="./grandfclock-chime.wav"
 HALF_HOUR_SOUND="./grandfclock-chime.wav"
 vol=3
 
@@ -13,7 +13,7 @@ play_chime() {
 #echo $hour
     local minute=$(date +"%M")
     
-    if [[ "$minute" == "12" ]]; then
+    if [[ "$minute" == "00" ]]; then
  	   afplay "$HOUR_START" -v $vol
         # Play hour chime for the number of hours
         for ((i=1; i<=hour; i++)); do
