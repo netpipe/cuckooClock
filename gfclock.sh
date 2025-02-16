@@ -20,7 +20,7 @@ play_chime() {
 #echo $hour
     local minute=$(date +"%M")
     
-    if [[ "$minute" == "06" ]]; then
+    if [[ "$minute" == "00" ]]; then
 	if [ $mac ]; then
  	   	afplay "$HOURSTART" -v $vol
 		say "the time is now" $hour
