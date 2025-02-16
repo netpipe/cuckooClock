@@ -3,8 +3,8 @@
 # Paths to sound files (modify these as needed)
 HOUR_START="./grandfclock.wav"
 HOUR_SOUND="./grandfclock-chime.wav"
-fiftenChime="./grandfclock-chime.wav"
-fourtyfive_SOUND="./grandfclock-chime.wav"
+fifteenSOUND="./grandfclock-chime.wav"
+fourtyfiveSOUND="./grandfclock-chime.wav"
 HALF_HOUR_SOUND="./grandfclock-chime.wav"
 vol=3
 mac=true
@@ -60,7 +60,7 @@ if [ $fourminchimes ]; then
 		say $hour "fourty five"//$minute
         	afplay "$fourtyfiveSOUND" -v $vol/2
 	else
-		aplay "$fourtyfive SOUND"
+		aplay "$fourtyfiveSOUND"
 	fi
 	sleep 200
 	fi
