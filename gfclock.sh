@@ -16,7 +16,7 @@ play_chime() {
     local minute=$(date +"%M")
     
     if [[ "$minute" == "00" ]]; then
-	if [ $mac ]; then
+	if  $mac ; then
  	   	afplay "$HOURSTART" -v $vol
 		say "the time is now" $hour
 	else
@@ -25,7 +25,7 @@ play_chime() {
         # Play hour chime for the number of hours
         for ((i=1; i<=hour; i++)); do
 	   #echo $hour
-		if [ $mac ]; then
+		if  $mac ; then
             	afplay "$HOURSOUND" -v $vol/2
 		else
 			aplay "$HOURSOUND"
@@ -37,7 +37,7 @@ fi
 if $thirtychime; then
     if [[ "$minute" == "30" ]]; then
         # Play half-hour chime
-	if [ $mac ]; then
+	if  $mac ; then
 		say $hour "thirty"#$minute
         	afplay "$HALFHOURSOUND" -v $vol/2
 	else
@@ -49,7 +49,7 @@ fi
 if $fourminchimes ; then
     if [[ "$minute" == "15" ]]; then
         # Play half-hour chime
-	if [ $mac ]; then
+	if  $mac ; then
 		say $hour "fifteen" #$minute
         	afplay "$fifteenSOUND" -v $vol/2
 	else
@@ -58,7 +58,7 @@ if $fourminchimes ; then
 	sleep 200
     elif [[ "$minute" == "45" ]]; then
         # Play half-hour chime
-	if [ $mac ]; then
+	if $mac ; then
 		say $hour "fourty five" #$minute
         	afplay "$fourtyfiveSOUND" -v $vol/2
 	else
