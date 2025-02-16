@@ -7,8 +7,9 @@ fifteenSOUND="./grandfclock-chime.wav"
 fourtyfiveSOUND="./grandfclock-chime.wav"
 HALF_HOUR_SOUND="./grandfclock-chime.wav"
 vol=3
-mac=true
-fourminchimes=false
+mac=true		# MACOS option
+fourminchimes=false # 15 minute chimes
+thirtychime=true # half hour chimes
 # Function to play the chime sound based on the time
 play_chime() {
     #local hour=$(date +"%I")  # Get the current hour (12-hour format)
@@ -34,21 +35,24 @@ play_chime() {
             #sleep 1  # Small delay between chimes
         done
 	sleep 200
-    elif [[ "$minute" == "30" ]]; then
+fi
+if [ $thirtychime ]; then
+    if [[ "$minute" == "30" ]]; then
         # Play half-hour chime
 	if [ $mac ]; then
-		say $hour "thirty"//$minute
+		say $hour "thirty"#$minute
         	afplay "$HALF_HOUR_SOUND" -v $vol/2
 	else
 		aplay "$HALF_HOUR_SOUND"
 	fi
 	sleep 200
+    fi
 fi
 if [ $fourminchimes ]; then
     if [[ "$minute" == "15" ]]; then
         # Play half-hour chime
 	if [ $mac ]; then
-		say $hour "fifteen"//$minute
+		say $hour "fifteen" #$minute
         	afplay "$fifteenSOUND" -v $vol/2
 	else
 		aplay "$fifteenSOUND"
@@ -57,7 +61,7 @@ if [ $fourminchimes ]; then
     elif [[ "$minute" == "45" ]]; then
         # Play half-hour chime
 	if [ $mac ]; then
-		say $hour "fourty five"//$minute
+		say $hour "fourty five" #$minute
         	afplay "$fourtyfiveSOUND" -v $vol/2
 	else
 		aplay "$fourtyfiveSOUND"
