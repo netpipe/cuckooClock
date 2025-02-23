@@ -68,7 +68,7 @@ fi
 	else
 		aplay "$fourfifteenSOUND"
 	fi
-	sleep 200
+	sleep 60
 fi
 fi
 if $fourminchimes ; then
