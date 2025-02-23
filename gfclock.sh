@@ -5,11 +5,14 @@ HOURSTART="./grandfclock.wav"
 HOURSOUND="./grandfclock-chime.wav"
 fifteenSOUND="./grandfclock-chime.wav"
 fourtyfiveSOUND="./grandfclock-chime.wav"
+fourfifteenSOUND="./sparky.wav"
+fourtwentySOUND="./bong.wav"
 HALFHOURSOUND="./grandfclock-chime.wav"
 vol=3
 mac=true	# MACOS option
 fourminchimes=false # 15 minute chimes
 thirtychime=true # half hour chimes
+fourtwentychime=true # 420
 
 play_chime() {
 	local hour=$((10#$(date +"%I")))  # Fix octal issue
@@ -38,7 +41,7 @@ if $thirtychime; then
     if [[ "$minute" == "30" ]]; then
         # Play half-hour chime
 	if  $mac ; then
-		say $hour "thirty"#$minute
+		say $hour "thirty"
         	afplay "$HALFHOURSOUND" -v $vol/2
 	else
 		aplay "$HALFHOURSOUND"
@@ -46,11 +49,33 @@ if $thirtychime; then
 	sleep 200
     fi
 fi
+if $fourtwentychime; then
+    if [[ "$hour" == "4" && "$minute" == "20" ]]; then
+        # Play half-hour chime
+	if  $mac ; then
+		say $hour "4 20"
+        	afplay "$fourtwentySOUND" -v $vol/2
+	else
+		aplay "$fourtwentySOUND"
+	fi
+	sleep 200
+fi
+     if [[ "$hour" == "4" && "$minute" == "19" ]]; then
+        # Play half-hour chime
+	if  $mac ; then
+		#say $hour "thirty"
+        	afplay "$fourfifteenSOUND" -v $vol/2
+	else
+		aplay "$fourfifteenSOUND"
+	fi
+	sleep 200
+fi
+fi
 if $fourminchimes ; then
     if [[ "$minute" == "15" ]]; then
         # Play half-hour chime
 	if  $mac ; then
-		say $hour "fifteen" #$minute
+		say $hour "fifteen"
         	afplay "$fifteenSOUND" -v $vol/2
 	else
 		aplay "$fifteenSOUND"
@@ -59,7 +84,7 @@ if $fourminchimes ; then
     elif [[ "$minute" == "45" ]]; then
         # Play half-hour chime
 	if $mac ; then
-		say $hour "fourty five" #$minute
+		say $hour "fourty five" 
         	afplay "$fourtyfiveSOUND" -v $vol/2
 	else
 		aplay "$fourtyfiveSOUND"
