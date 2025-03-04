@@ -8,7 +8,7 @@ fourtyfiveSOUND="./grandfclock-chime.wav"
 fourfifteenSOUND="./sparky.wav"
 fourtwentySOUND="./bong.wav"
 HALFHOURSOUND="./grandfclock-chime.wav"
-vol=3
+vol=2
 mac=true	# MACOS option
 fourminchimes=false # 15 minute chimes
 thirtychime=true # half hour chimes
@@ -20,7 +20,7 @@ play_chime() {
     
     if [[ "$minute" == "00" ]]; then
 	if  $mac ; then
- 	   	afplay "$HOURSTART" -v $vol
+ 	   	afplay "$HOURSTART" -v $vol*2
 		say "the time is now" $hour
 	else
 		aplay "$HOURSTART"
@@ -53,7 +53,7 @@ if $fourtwentychime; then
     if [[ "$hour" == "4" && "$minute" == "20" ]]; then
         # Play half-hour chime
 	if  $mac ; then
-		say $hour "4 20"
+		say "4 20"
         	afplay "$fourtwentySOUND" -v $vol/2
 	else
 		aplay "$fourtwentySOUND"
